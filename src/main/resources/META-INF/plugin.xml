@@ -1,0 +1,72 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
+    <id>com.sohocn.serialVersionUID</id>
+
+    <!-- Public plugin name should be written in Title Case.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
+    <name>SerialVersionUID Generator</name>
+
+    <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
+    <vendor email="support@sohocn.com" url="https://www.sohocn.com">SohoCN</vendor>
+
+    <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
+         Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
+    <description><![CDATA[
+    <p>自动为实现Serializable接口的类生成serialVersionUID字段。</p>
+    <p>功能特点：</p>
+    <ul>
+        <li>自动为实现Serializable接口的类添加serialVersionUID字段</li>
+        <li>如果存在@Serial注解，自动引入并添加注解</li>
+        <li>当文件已有serialVersionUID变量时，再次运行会更新值</li>
+        <li>当用户继承Serializable接口时，提示是否自动生成serialVersionUID变量（使用自动完成）</li>
+        <li>在编辑器右键菜单中提供生成serialVersionUID的选项</li>
+        <li>实现Serializable接口时自动生成serialVersionUID字段</li>
+        <li>根据Java SDK版本决定是否添加@Serial注解（Java 14+）</li>
+    </ul>
+  ]]></description>
+
+    <!-- Product and plugin compatibility requirements.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
+
+    <!-- Extension points defined by the plugin.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- 注册意图动作 -->
+        <intentionAction>
+            <className>com.sohocn.serialVersionUID.AddSerialVersionUIDIntention</className>
+            <category>Java/Serialization</category>
+        </intentionAction>
+        
+        <!-- 注册代码完成贡献者 -->
+        <completion.contributor language="JAVA" implementationClass="com.sohocn.serialVersionUID.SerialVersionUIDCompletionContributor"/>
+        
+        <!-- 注册Serializable接口实现代码完成贡献者 -->
+        <completion.contributor language="JAVA" implementationClass="com.sohocn.serialVersionUID.SerializableImplementationCompletionContributor"/>
+        
+        <!-- 注册检查器 -->
+        <localInspection language="JAVA" 
+                         displayName="Serializable class should have serialVersionUID" 
+                         groupName="Serialization" 
+                         enabledByDefault="true" 
+                         level="WARNING" 
+                         implementationClass="com.sohocn.serialVersionUID.SerialVersionUIDInspection"/>
+                         
+        <!-- 注册启动活动 -->
+        <postStartupActivity implementation="com.sohocn.serialVersionUID.SerialVersionUIDPostStartupActivity"/>
+    </extensions>
+    
+    <!-- 注册Action -->
+    <actions>
+        <action id="com.sohocn.serialVersionUID.GenerateSerialVersionUIDAction"
+                class="com.sohocn.serialVersionUID.GenerateSerialVersionUIDAction"
+                text="生成 serialVersionUID"
+                description="为实现Serializable接口的类生成serialVersionUID字段">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <add-to-group group-id="GenerateGroup" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>
