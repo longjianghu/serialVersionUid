@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.sohocn"
-version = "1.0-SNAPSHOT"
+version = "1.0.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -15,7 +15,7 @@ repositories {
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
 intellij {
     version.set("2024.1.7")
-    type.set("IC") // Target IDE Platform
+    type.set("IU")
 
     plugins.set(listOf(
         "com.intellij.java" // 添加Java插件依赖
