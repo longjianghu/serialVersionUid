@@ -33,9 +33,12 @@ public class SerialVersionUIDPostStartupActivity implements StartupActivity.Dumb
                     // 检查类是否实现了Serializable接口
                     if (SerialVersionUIDGenerator.isSerializable(psiClass) && 
                         SerialVersionUIDGenerator.findSerialVersionUIDField(psiClass) == null) {
-                        // 在写入命令中执行添加serialVersionUID的操作
-                        WriteCommandAction.runWriteCommandAction(project, () -> {
-                            addSerialVersionUID(psiClass, project);
+                        // 使用invokeLater延迟执行PSI修改操作，避免在事件处理过程中直接修改PSI
+                        com.intellij.openapi.application.ApplicationManager.getApplication().invokeLater(() -> {
+                            // 在写入命令中执行添加serialVersionUID的操作
+                            WriteCommandAction.runWriteCommandAction(project, () -> {
+                                addSerialVersionUID(psiClass, project);
+                            });
                         });
                     }
                 }

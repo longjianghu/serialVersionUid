@@ -100,65 +100,68 @@ public class SerializableImplementationCompletionContributor extends CompletionC
                                     // 生成serialVersionUID值
                                     long serialVersionUID = SerialVersionUIDGenerator.generateSerialVersionUID(psiClass);
                                     
-                                    // 创建serialVersionUID字段
-                                    WriteCommandAction.runWriteCommandAction(project, () -> {
-                                        PsiElementFactory factory = JavaPsiFacade.getElementFactory(project);
-                                        String fieldText = SerialVersionUIDGenerator.createSerialVersionUIDFieldText(serialVersionUID, project);
-                                        PsiField field = factory.createFieldFromText(fieldText, psiClass);
-                                        
-                                        // 添加字段到类中
-                                        PsiElement anchor = null;
-                                        PsiField[] fields = psiClass.getFields();
-                                        if (fields.length > 0) {
-                                            anchor = fields[0];
-                                        } else {
-                                            PsiMethod[] methods = psiClass.getMethods();
-                                            if (methods.length > 0) {
-                                                anchor = methods[0];
+                                    // 使用invokeLater延迟执行PSI修改操作
+                                    com.intellij.openapi.application.ApplicationManager.getApplication().invokeLater(() -> {
+                                        // 创建serialVersionUID字段
+                                        WriteCommandAction.runWriteCommandAction(project, () -> {
+                                            PsiElementFactory factory = JavaPsiFacade.getElementFactory(project);
+                                            String fieldText = SerialVersionUIDGenerator.createSerialVersionUIDFieldText(serialVersionUID, project);
+                                            PsiField field = factory.createFieldFromText(fieldText, psiClass);
+                                            
+                                            // 添加字段到类中
+                                            PsiElement anchor = null;
+                                            PsiField[] fields = psiClass.getFields();
+                                            if (fields.length > 0) {
+                                                anchor = fields[0];
                                             } else {
-                                                PsiClass[] innerClasses = psiClass.getInnerClasses();
-                                                if (innerClasses.length > 0) {
-                                                    anchor = innerClasses[0];
+                                                PsiMethod[] methods = psiClass.getMethods();
+                                                if (methods.length > 0) {
+                                                    anchor = methods[0];
+                                                } else {
+                                                    PsiClass[] innerClasses = psiClass.getInnerClasses();
+                                                    if (innerClasses.length > 0) {
+                                                        anchor = innerClasses[0];
+                                                    }
                                                 }
                                             }
-                                        }
-                                        
-                                        if (anchor != null) {
-                                            psiClass.addBefore(field, anchor);
-                                        } else {
-                                            psiClass.add(field);
-                                        }
-                                        
-                                        // 添加Serial注解的导入
-                                        if (SerialVersionUIDGenerator.shouldUseSerialAnnotation(project)) {
-                                            PsiFile file1 = psiClass.getContainingFile();
-                                            if (file1 instanceof PsiJavaFile) {
-                                                PsiJavaFile javaFile = (PsiJavaFile) file1;
-                                                PsiImportList importList = javaFile.getImportList();
-                                                
-                                                if (importList != null) {
-                                                    boolean hasSerialImport = false;
-                                                    for (PsiImportStatement importStatement : importList.getImportStatements()) {
-                                                        if ("java.io.Serial".equals(importStatement.getQualifiedName())) {
-                                                            hasSerialImport = true;
-                                                            break;
-                                                        }
-                                                    }
+                                            
+                                            if (anchor != null) {
+                                                psiClass.addBefore(field, anchor);
+                                            } else {
+                                                psiClass.add(field);
+                                            }
+                                            
+                                            // 添加Serial注解的导入
+                                            if (SerialVersionUIDGenerator.shouldUseSerialAnnotation(project)) {
+                                                PsiFile file1 = psiClass.getContainingFile();
+                                                if (file1 instanceof PsiJavaFile) {
+                                                    PsiJavaFile javaFile = (PsiJavaFile) file1;
+                                                    PsiImportList importList = javaFile.getImportList();
                                                     
-                                                    if (!hasSerialImport) {
-                                                        PsiClass serialClass = JavaPsiFacade.getInstance(project)
-                                                                .findClass("java.io.Serial", psiClass.getResolveScope());
-                                                        if (serialClass != null) {
-                                                            PsiImportStatement importStatement = factory.createImportStatement(serialClass);
-                                                            importList.add(importStatement);
+                                                    if (importList != null) {
+                                                        boolean hasSerialImport = false;
+                                                        for (PsiImportStatement importStatement : importList.getImportStatements()) {
+                                                            if ("java.io.Serial".equals(importStatement.getQualifiedName())) {
+                                                                hasSerialImport = true;
+                                                                break;
+                                                            }
+                                                        }
+                                                        
+                                                        if (!hasSerialImport) {
+                                                            PsiClass serialClass = JavaPsiFacade.getInstance(project)
+                                                                    .findClass("java.io.Serial", psiClass.getResolveScope());
+                                                            if (serialClass != null) {
+                                                                PsiImportStatement importStatement = factory.createImportStatement(serialClass);
+                                                                importList.add(importStatement);
+                                                            }
                                                         }
                                                     }
                                                 }
                                             }
-                                        }
-                                        
-                                        // 优化导入
-                                        JavaCodeStyleManager.getInstance(project).optimizeImports(psiClass.getContainingFile());
+                                            
+                                            // 优化导入
+                                            JavaCodeStyleManager.getInstance(project).optimizeImports(psiClass.getContainingFile());
+                                        });
                                     });
                                 }));
                     }

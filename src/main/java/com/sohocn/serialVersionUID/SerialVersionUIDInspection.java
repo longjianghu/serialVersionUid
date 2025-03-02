@@ -6,6 +6,8 @@ import org.jetbrains.annotations.Nullable;
 import com.intellij.codeInspection.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 
 /**
  * 检查实现了Serializable接口的类是否有serialVersionUID字段
@@ -152,57 +154,66 @@ public class SerialVersionUIDInspection extends LocalInspectionTool {
             // 生成serialVersionUID值
             long serialVersionUID = SerialVersionUIDGenerator.generateSerialVersionUID(psiClass);
 
-            // 创建serialVersionUID字段
-            PsiElementFactory factory = JavaPsiFacade.getElementFactory(project);
-            String fieldText = "@Serial\nprivate static final long serialVersionUID = " + serialVersionUID + "L;";
-            PsiField field = factory.createFieldFromText(fieldText, psiClass);
+            // 使用invokeLater延迟执行PSI修改操作
+            ApplicationManager.getApplication().invokeLater(() -> {
+                // 创建serialVersionUID字段
+                PsiElementFactory factory = JavaPsiFacade.getElementFactory(project);
+                String fieldText = SerialVersionUIDGenerator.createSerialVersionUIDFieldText(serialVersionUID, project);
+                PsiField field = factory.createFieldFromText(fieldText, psiClass);
 
-            // 添加字段到类中
-            PsiElement anchor = null;
-            PsiField[] fields = psiClass.getFields();
-            if (fields.length > 0) {
-                anchor = fields[0];
-            } else {
-                PsiMethod[] methods = psiClass.getMethods();
-                if (methods.length > 0) {
-                    anchor = methods[0];
+                // 添加字段到类中
+                PsiElement anchor = null;
+                PsiField[] fields = psiClass.getFields();
+                if (fields.length > 0) {
+                    anchor = fields[0];
                 } else {
-                    PsiClass[] innerClasses = psiClass.getInnerClasses();
-                    if (innerClasses.length > 0) {
-                        anchor = innerClasses[0];
-                    }
-                }
-            }
-
-            if (anchor != null) {
-                psiClass.addBefore(field, anchor);
-            } else {
-                psiClass.add(field);
-            }
-
-            // 添加导入
-            PsiFile file = psiClass.getContainingFile();
-            if (file instanceof PsiJavaFile) {
-                PsiImportList importList = ((PsiJavaFile) file).getImportList();
-                if (importList != null) {
-                    boolean hasSerialImport = false;
-                    for (PsiImportStatement importStatement : importList.getImportStatements()) {
-                        if ("java.io.Serial".equals(importStatement.getQualifiedName())) {
-                            hasSerialImport = true;
-                            break;
-                        }
-                    }
-
-                    if (!hasSerialImport) {
-                        PsiClass serialClass = JavaPsiFacade.getInstance(project)
-                                .findClass("java.io.Serial", psiClass.getResolveScope());
-                        if (serialClass != null) {
-                            PsiImportStatement importStatement = factory.createImportStatement(serialClass);
-                            importList.add(importStatement);
+                    PsiMethod[] methods = psiClass.getMethods();
+                    if (methods.length > 0) {
+                        anchor = methods[0];
+                    } else {
+                        PsiClass[] innerClasses = psiClass.getInnerClasses();
+                        if (innerClasses.length > 0) {
+                            anchor = innerClasses[0];
                         }
                     }
                 }
-            }
+
+                if (anchor != null) {
+                    psiClass.addBefore(field, anchor);
+                } else {
+                    psiClass.add(field);
+                }
+
+                // 添加Serial注解的导入
+                if (SerialVersionUIDGenerator.shouldUseSerialAnnotation(project)) {
+                    PsiFile file = psiClass.getContainingFile();
+                    if (file instanceof PsiJavaFile) {
+                        PsiJavaFile javaFile = (PsiJavaFile) file;
+                        PsiImportList importList = javaFile.getImportList();
+                        
+                        if (importList != null) {
+                            boolean hasSerialImport = false;
+                            for (PsiImportStatement importStatement : importList.getImportStatements()) {
+                                if ("java.io.Serial".equals(importStatement.getQualifiedName())) {
+                                    hasSerialImport = true;
+                                    break;
+                                }
+                            }
+                            
+                            if (!hasSerialImport) {
+                                PsiClass serialClass = JavaPsiFacade.getInstance(project).findClass("java.io.Serial", psiClass.getResolveScope());
+                                if (serialClass != null) {
+                                    PsiImportStatement importStatement = factory.createImportStatement(serialClass);
+                                    importList.add(importStatement);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // 优化导入
+                JavaCodeStyleManager.getInstance(project).optimizeImports(psiClass.getContainingFile());
+            });
         }
     }
 } 
