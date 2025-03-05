@@ -1,10 +1,9 @@
-package com.sohoch.serialVersionUid.action;
+package com.sohoch.serialVersionUid.intention;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.codeInsight.intention.IntentionAction;
+import com.intellij.codeInsight.intention.PsiElementBaseIntentionAction;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.module.ModuleUtil;
@@ -12,23 +11,46 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.IncorrectOperationException;
 import com.sohoch.serialVersionUid.util.SerialVersionUIDGenerator;
 
-public class GenerateSerialVersionUIDAction extends AnAction {
-    @Override
-    public void actionPerformed(@NotNull AnActionEvent e) {
-        Project project = e.getProject();
-        Editor editor = e.getData(CommonDataKeys.EDITOR);
-        PsiFile psiFile = e.getData(CommonDataKeys.PSI_FILE);
+public class GenerateSerialVersionUIDIntention extends PsiElementBaseIntentionAction implements IntentionAction {
 
-        if (project == null || editor == null || psiFile == null) {
-            return;
+    @Override
+    public @NotNull String getText() {
+        return "生成 serialVersionUID";
+    }
+
+    @Override
+    public @NotNull String getFamilyName() {
+        return "Serialization";
+    }
+
+    @Override
+    public boolean isAvailable(@NotNull Project project, Editor editor, @NotNull PsiElement element) {
+        if (project == null || editor == null) {
+            return false;
         }
 
-        PsiElement element = psiFile.findElementAt(editor.getCaretModel().getOffset());
         PsiClass psiClass = PsiTreeUtil.getParentOfType(element, PsiClass.class);
+        if (psiClass == null) {
+            return false;
+        }
 
-        if (psiClass == null || !SerialVersionUIDGenerator.isSerializable(psiClass)) {
+        // 检查类是否实现了Serializable接口
+        if (!SerialVersionUIDGenerator.isSerializable(psiClass)) {
+            return false;
+        }
+
+        // 检查是否已经存在serialVersionUID字段
+        PsiField existingField = psiClass.findFieldByName("serialVersionUID", false);
+        return existingField == null;
+    }
+
+    @Override
+    public void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement element) throws IncorrectOperationException {
+        PsiClass psiClass = PsiTreeUtil.getParentOfType(element, PsiClass.class);
+        if (psiClass == null) {
             return;
         }
 
@@ -65,21 +87,7 @@ public class GenerateSerialVersionUIDAction extends AnAction {
     }
 
     @Override
-    public void update(@NotNull AnActionEvent e) {
-        Project project = e.getProject();
-        Editor editor = e.getData(CommonDataKeys.EDITOR);
-        PsiFile psiFile = e.getData(CommonDataKeys.PSI_FILE);
-
-        if (project == null || editor == null || psiFile == null) {
-            e.getPresentation().setEnabledAndVisible(false);
-            return;
-        }
-
-        PsiElement element = psiFile.findElementAt(editor.getCaretModel().getOffset());
-        PsiClass psiClass = PsiTreeUtil.getParentOfType(element, PsiClass.class);
-
-        e.getPresentation().setEnabledAndVisible(
-            psiClass != null && SerialVersionUIDGenerator.isSerializable(psiClass)
-        );
+    public boolean startInWriteAction() {
+        return false;
     }
 }

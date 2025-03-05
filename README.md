@@ -4,14 +4,10 @@
 
 ## 功能特点
 
-- 自动为实现Serializable接口的类添加serialVersionUID字段
-- 如果存在@Serial注解，自动引入并添加注释
-- 当文件已有serialVersionUID变量时，再次运行会更新值
-- 当用户继承Serializable接口时，提示是否自动生成serialVersionUID变量（使用自动完成）
-- 在编辑器右键菜单中提供生成serialVersionUID的选项
-- 实现Serializable接口时自动生成serialVersionUID字段
-- 根据Java SDK版本决定是否添加@Serial注解（Java 14+）
-- 在实现Serializable接口时通过自动完成机制提示生成serialVersionUID
+- 自动为实现`Serializable`接口的类添加`serialVersionUID`字段
+- 当用户继承`Serializable`接口时提示是否自动生成serialVersionUID变量（使用自动完成，当用户按Tab自完成后自动添加serialVersionUID）
+- 在编辑器右键菜单中提供生成`serialVersionUID`的选项
+- 根据Java SDK版本决定是否添加@Serial注解并引入类文件（Java 14+）
 
 ## 使用方法
 
@@ -56,7 +52,7 @@
 
 ## 要求
 
-- IntelliJ IDEA 2024.1或更高版本
+- IntelliJ IDEA 2023.1或更高版本
 - Java 17或更高版本
 
 ## 许可证

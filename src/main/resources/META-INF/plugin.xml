@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.sohoch.serialVersionUid</id>
     <name>SerialVersionUID Generator</name>
-    <vendor>Sohoch</vendor>
+    <vendor email="215241062@qq.com" url="http://wwww.sohocn.net">龙江湖</vendor>
     <description>自动为实现Serializable接口的类生成serialVersionUID字段</description>
 
     <depends>com.intellij.modules.platform</depends>
@@ -18,8 +18,8 @@
 
     <actions>
         <action id="GenerateSerialVersionUID" 
-                class="com.sohoch.serialVersionUid.action.GenerateSerialVersionUIDAction" 
-                text="SerialVersionUID" 
+                class="com.sohoch.serialVersionUid.action.GenerateSerialVersionUIDAction"
+                text="SerialVersionUID"
                 description="Generate serialVersionUID for Serializable class">
             <add-to-group group-id="GenerateGroup" anchor="last"/>
         </action>
