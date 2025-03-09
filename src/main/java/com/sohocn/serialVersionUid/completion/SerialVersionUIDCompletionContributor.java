@@ -160,15 +160,6 @@ public class SerialVersionUIDCompletionContributor extends CompletionContributor
                                                                     }
                                                                 }
                                                             }
-                                                            
-                                                            // 显示提示信息，告知用户已自动生成serialVersionUID
-                                                            com.intellij.notification.NotificationGroupManager.getInstance()
-                                                                .getNotificationGroup("SerialVersionUID Generator")
-                                                                .createNotification(
-                                                                        "SerialVersionUID Generator",
-                                                                        "已为类 '" + psiClass.getName() + "' 自动生成serialVersionUID字段",
-                                                                        com.intellij.notification.NotificationType.INFORMATION)
-                                                                .notify(psiClass.getProject());
                                                         });
                                                     }
                                                 });
