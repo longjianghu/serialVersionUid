@@ -1,27 +1,30 @@
 <idea-plugin>
-    <id>com.sohoch.serialVersionUid</id>
+    <id>com.sohocn.serialVersionUid</id>
     <name>SerialVersionUID Generator</name>
-    <vendor email="215241062@qq.com" url="http://wwww.sohocn.net">龙江湖</vendor>
-    <description>自动为实现Serializable接口的类生成serialVersionUID字段</description>
+    <vendor email="215241062@qq.com">龙江湖</vendor>
+    <description><![CDATA[自动为实现Serializable接口的类生成serialVersionUID]]></description>
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <completion.contributor language="JAVA" 
-            implementationClass="com.sohoch.serialVersionUid.completion.SerialVersionUIDCompletionContributor"/>
+        <completion.contributor language="JAVA"
+                                implementationClass="com.sohocn.serialVersionUid.completion.SerialVersionUIDCompletionContributor"/>
         <intentionAction>
-            <className>com.sohoch.serialVersionUid.intention.GenerateSerialVersionUIDIntention</className>
-            <category>Java/Serialization</category>
+            <className>com.sohocn.serialVersionUid.intention.GenerateSerialVersionUIDIntention</className>
+            <category>Serialization</category>
         </intentionAction>
+        <implicitUsageProvider implementation="com.sohocn.serialVersionUid.listener.SerializableImplementationListener"/>
+        <psi.treeChangePreprocessor implementation="com.sohocn.serialVersionUid.listener.SerializableClassListener"/>
     </extensions>
 
     <actions>
-        <action id="GenerateSerialVersionUID" 
-                class="com.sohoch.serialVersionUid.action.GenerateSerialVersionUIDAction"
+        <action id="GenerateSerialVersionUID"
+                class="com.sohocn.serialVersionUid.action.GenerateSerialVersionUIDAction"
                 text="SerialVersionUID"
                 description="Generate serialVersionUID for Serializable class">
             <add-to-group group-id="GenerateGroup" anchor="last"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
         </action>
     </actions>
 </idea-plugin>
