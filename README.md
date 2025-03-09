@@ -9,7 +9,7 @@
 - 如果用户没有引用`Serializable`和`Serial`类文件，则自动导入（如果存在则不导入）
 - 在编辑器的右键菜单提供`SerialVersionUID`菜单项
 - 当多次触发时,如果相关的字段、注解和文件存在(不存在根据上面的规则进行自动实全),智能判断是否需要更新`serialVersionUID`值
-- 用户可以通过快捷键（Alt+Insert（Windows/Linux）或Cmd+N（Mac）进行触发
+- 用户可以通过快捷键（Alt+S/Linux）或Cmd+N（Mac）进行触发
 
 ## 使用方法
 
