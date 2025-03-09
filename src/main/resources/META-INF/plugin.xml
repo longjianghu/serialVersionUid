@@ -15,8 +15,6 @@
             <className>com.sohocn.serialVersionUid.intention.GenerateSerialVersionUIDIntention</className>
             <category>Serialization</category>
         </intentionAction>
-        <implicitUsageProvider implementation="com.sohocn.serialVersionUid.listener.SerializableImplementationListener"/>
-        <psi.treeChangePreprocessor implementation="com.sohocn.serialVersionUid.listener.SerializableClassListener"/>
     </extensions>
 
     <actions>
