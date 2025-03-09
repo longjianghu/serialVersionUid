@@ -4,7 +4,7 @@
 
 ## 功能特点
 
-- 当用户在接口列表中输入`Serializable`时，提示是否自动生成`serialVersionUID`，如果用户按TAB键插件为用户自动生成`serialVersionUID`
+- 当用户在接口列表中输入`Serializable`时，按Tab键自动补全接口名称并自动生成`serialVersionUID`字段
 - 根据Java SDK版本智能决定是否添加`@Serial`注解（Java 14+）
 - 如果用户没有引用`Serializable`和`Serial`类文件，则自动导入（如果存在则不导入）
 - 在编辑器的右键菜单提供`SerialVersionUID`菜单项

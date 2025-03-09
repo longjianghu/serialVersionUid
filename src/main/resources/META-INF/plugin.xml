@@ -8,6 +8,7 @@
     <depends>com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+        <notificationGroup id="SerialVersionUID Generator" displayType="BALLOON" />
         <completion.contributor language="JAVA"
                                 implementationClass="com.sohocn.serialVersionUid.completion.SerialVersionUIDCompletionContributor"/>
         <intentionAction>
@@ -19,7 +20,7 @@
     </extensions>
 
     <actions>
-        <action id="GenerateSerialVersionUID"
+        <action id="com.sohocn.serialVersionUid.GenerateSerialVersionUID"
                 class="com.sohocn.serialVersionUid.action.GenerateSerialVersionUIDAction"
                 text="SerialVersionUID"
                 description="Generate serialVersionUID for Serializable class">

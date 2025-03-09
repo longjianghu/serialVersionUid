@@ -2,6 +2,7 @@ package com.sohocn.serialVersionUid.completion;
 
 import com.intellij.codeInsight.completion.*;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.patterns.PsiJavaPatterns;
 import com.intellij.psi.*;
 import com.intellij.util.ProcessingContext;
@@ -119,66 +120,56 @@ public class SerialVersionUIDCompletionContributor extends CompletionContributor
                                                 }
                                             }
                                             
-                                            // 提示用户是否生成serialVersionUID
+                                            // 自动生成serialVersionUID
                                             PsiDocumentManager.getInstance(psiClass.getProject()).commitDocument(context1.getDocument());
                                             
                                             if (psiClass != null) {
-                                                // 显示通知，询问用户是否生成serialVersionUID
+                                                // 直接生成serialVersionUID字段，无需用户确认
                                                 ApplicationManager.getApplication().invokeLater(() -> {
                                                     if (psiClass.isValid() && !psiClass.getProject().isDisposed()) {
-                                                        com.intellij.notification.NotificationGroupManager.getInstance()
+                                                        // 生成serialVersionUID字段
+                                                        String serialVersionUIDCode = SerialVersionUIDGenerator.generateSerialVersionUID(psiClass);
+                                                        PsiElementFactory factory = JavaPsiFacade.getElementFactory(psiClass.getProject());
+                                                        PsiField field = factory.createFieldFromText(serialVersionUIDCode, psiClass);
+                                                        
+                                                        // 使用WriteCommandAction包装PSI修改操作
+                                                        com.intellij.openapi.command.WriteCommandAction.runWriteCommandAction(psiClass.getProject(), "Generate serialVersionUID", null, () -> {
+                                                            // 添加字段到类的最前面
+                                                            PsiElement[] children = psiClass.getChildren();
+                                                            if (children.length > 0) {
+                                                                psiClass.addBefore(field, children[0]);
+                                                            } else {
+                                                                psiClass.add(field);
+                                                            }
+                                                            
+                                                            // 添加@Serial注解的导入（如果需要）
+                                                            boolean useSerialAnnotation = SerialVersionUIDGenerator.shouldUseSerialAnnotation(psiClass.getProject());
+                                                            if (useSerialAnnotation) {
+                                                                PsiFile psiFile = psiClass.getContainingFile();
+                                                                if (psiFile instanceof PsiJavaFile) {
+                                                                    PsiJavaFile javaFile = (PsiJavaFile) file;
+                                                                    PsiImportList importList = javaFile.getImportList();
+                                                                    if (importList != null && !SerialVersionUIDGenerator.hasImport(importList, "java.io.Serial")) {
+                                                                        PsiClass serialClass = JavaPsiFacade.getInstance(psiClass.getProject()).findClass(
+                                                                                "java.io.Serial",
+                                                                                psiClass.getResolveScope()
+                                                                        );
+                                                                        if (serialClass != null) {
+                                                                            importList.add(factory.createImportStatement(serialClass));
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                            
+                                                            // 显示提示信息，告知用户已自动生成serialVersionUID
+                                                            com.intellij.notification.NotificationGroupManager.getInstance()
                                                                 .getNotificationGroup("SerialVersionUID Generator")
                                                                 .createNotification(
                                                                         "SerialVersionUID Generator",
-                                                                        "是否为类 '" + psiClass.getName() + "' 生成serialVersionUID字段？",
+                                                                        "已为类 '" + psiClass.getName() + "' 自动生成serialVersionUID字段",
                                                                         com.intellij.notification.NotificationType.INFORMATION)
-                                                                .addAction(new com.intellij.notification.NotificationAction("生成") {
-                                                                    @Override
-                                                                    public void actionPerformed(@NotNull com.intellij.notification.Notification notification, @NotNull com.intellij.openapi.actionSystem.AnActionEvent e) {
-                                                                        notification.expire();
-                                                                        // 生成serialVersionUID字段
-                                                                        String serialVersionUIDCode = SerialVersionUIDGenerator.generateSerialVersionUID(psiClass);
-                                                                        PsiElementFactory factory = JavaPsiFacade.getElementFactory(psiClass.getProject());
-                                                                        PsiField field = factory.createFieldFromText(serialVersionUIDCode, psiClass);
-                                                                        
-                                                                        // 使用WriteCommandAction包装PSI修改操作
-                                                                        com.intellij.openapi.command.WriteCommandAction.runWriteCommandAction(psiClass.getProject(), "Generate serialVersionUID", null, () -> {
-                                                                            // 添加字段到类的最前面
-                                                                            PsiElement[] children = psiClass.getChildren();
-                                                                            if (children.length > 0) {
-                                                                                psiClass.addBefore(field, children[0]);
-                                                                            } else {
-                                                                                psiClass.add(field);
-                                                                            }
-                                                                            
-                                                                            // 添加@Serial注解的导入（如果需要）
-                                                                            boolean useSerialAnnotation = SerialVersionUIDGenerator.shouldUseSerialAnnotation(psiClass.getProject());
-                                                                            if (useSerialAnnotation) {
-                                                                                PsiFile file = psiClass.getContainingFile();
-                                                                                if (file instanceof PsiJavaFile) {
-                                                                                    PsiJavaFile javaFile = (PsiJavaFile) file;
-                                                                                    PsiImportList importList = javaFile.getImportList();
-                                                                                    if (importList != null && !SerialVersionUIDGenerator.hasImport(importList, "java.io.Serial")) {
-                                                                                        PsiClass serialClass = JavaPsiFacade.getInstance(psiClass.getProject()).findClass(
-                                                                                                "java.io.Serial",
-                                                                                                psiClass.getResolveScope()
-                                                                                        );
-                                                                                        if (serialClass != null) {
-                                                                                            importList.add(factory.createImportStatement(serialClass));
-                                                                                        }
-                                                                                    }
-                                                                                }
-                                                                            }
-                                                                        });
-                                                                    }
-                                                                })
-                                                                .addAction(new com.intellij.notification.NotificationAction("取消") {
-                                                                    @Override
-                                                                    public void actionPerformed(@NotNull com.intellij.notification.Notification notification, @NotNull com.intellij.openapi.actionSystem.AnActionEvent e) {
-                                                                        notification.expire();
-                                                                    }
-                                                                })
                                                                 .notify(psiClass.getProject());
+                                                        });
                                                     }
                                                 });
                                             }
@@ -253,61 +244,55 @@ public class SerialVersionUIDCompletionContributor extends CompletionContributor
                                                 }
                                             }
                                             
-                                            // 提示用户是否生成serialVersionUID
+                                            // 自动生成serialVersionUID
                                             PsiDocumentManager.getInstance(psiClass.getProject()).commitDocument(context1.getDocument());
                                             
-                                            // 显示通知，询问用户是否生成serialVersionUID
+                                            // 直接生成serialVersionUID字段，无需用户确认
                                             ApplicationManager.getApplication().invokeLater(() -> {
                                                 if (psiClass.isValid() && !psiClass.getProject().isDisposed()) {
-                                                    com.intellij.notification.NotificationGroupManager.getInstance()
+                                                    // 生成serialVersionUID字段
+                                                    String serialVersionUIDCode = SerialVersionUIDGenerator.generateSerialVersionUID(psiClass);
+                                                    PsiElementFactory factory = JavaPsiFacade.getElementFactory(psiClass.getProject());
+                                                    PsiField field = factory.createFieldFromText(serialVersionUIDCode, psiClass);
+                                                    
+                                                    // 使用WriteCommandAction包装PSI修改操作
+                                                    com.intellij.openapi.command.WriteCommandAction.runWriteCommandAction(psiClass.getProject(), "Generate serialVersionUID", null, () -> {
+                                                        // 添加字段到类的最前面
+                                                        PsiElement[] children = psiClass.getChildren();
+                                                        if (children.length > 0) {
+                                                            psiClass.addBefore(field, children[0]);
+                                                        } else {
+                                                            psiClass.add(field);
+                                                        }
+                                                        
+                                                        // 添加@Serial注解的导入（如果需要）
+                                                        boolean useSerialAnnotation = SerialVersionUIDGenerator.shouldUseSerialAnnotation(psiClass.getProject());
+                                                        if (useSerialAnnotation) {
+                                                            PsiFile psiFile = psiClass.getContainingFile();
+                                                            if (psiFile instanceof PsiJavaFile) {
+                                                                PsiJavaFile javaFile = (PsiJavaFile) psiFile;
+                                                                PsiImportList importList = javaFile.getImportList();
+                                                                if (importList != null && !SerialVersionUIDGenerator.hasImport(importList, "java.io.Serial")) {
+                                                                    PsiClass serialClass = JavaPsiFacade.getInstance(psiClass.getProject()).findClass(
+                                                                            "java.io.Serial",
+                                                                            psiClass.getResolveScope()
+                                                                    );
+                                                                    if (serialClass != null) {
+                                                                        importList.add(factory.createImportStatement(serialClass));
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        
+                                                        // 显示提示信息，告知用户已自动生成serialVersionUID
+                                                        com.intellij.notification.NotificationGroupManager.getInstance()
                                                             .getNotificationGroup("SerialVersionUID Generator")
                                                             .createNotification(
                                                                     "SerialVersionUID Generator",
-                                                                    "是否为类 '" + psiClass.getName() + "' 生成serialVersionUID字段？",
+                                                                    "已为类 '" + psiClass.getName() + "' 自动生成serialVersionUID字段",
                                                                     com.intellij.notification.NotificationType.INFORMATION)
-                                                            .addAction(new com.intellij.notification.NotificationAction("生成") {
-                                                                @Override
-                                                                public void actionPerformed(@NotNull com.intellij.notification.Notification notification, @NotNull com.intellij.openapi.actionSystem.AnActionEvent e) {
-                                                                    notification.expire();
-                                                                    // 生成serialVersionUID字段
-                                                                    String serialVersionUIDCode = SerialVersionUIDGenerator.generateSerialVersionUID(psiClass);
-                                                                    PsiElementFactory factory = JavaPsiFacade.getElementFactory(psiClass.getProject());
-                                                                    PsiField field = factory.createFieldFromText(serialVersionUIDCode, psiClass);
-                                                                    
-                                                                    // 使用WriteCommandAction包装PSI修改操作
-                                                                    com.intellij.openapi.command.WriteCommandAction.runWriteCommandAction(psiClass.getProject(), "Generate serialVersionUID", null, () -> {
-                                                                        // 添加字段到类的最前面
-                                                                        PsiElement[] children = psiClass.getChildren();
-                                                                        if (children.length > 0) {
-                                                                            psiClass.addBefore(field, children[0]);
-                                                                        } else {
-                                                                            psiClass.add(field);
-                                                                        }
-                                                                        
-                                                                        // 添加@Serial注解的导入（如果需要）
-                                                                        boolean useSerialAnnotation = SerialVersionUIDGenerator.shouldUseSerialAnnotation(psiClass.getProject());
-                                                                        if (useSerialAnnotation) {
-                                                                            PsiJavaFile javaFile = (PsiJavaFile) file;
-                                                                            PsiImportList importList = javaFile.getImportList();
-                                                                            if (importList != null && !SerialVersionUIDGenerator.hasImport(importList, "java.io.Serial")) {
-                                                                                importList.add(factory.createImportStatement(
-                                                                                        JavaPsiFacade.getInstance(psiClass.getProject()).findClass(
-                                                                                                "java.io.Serial",
-                                                                                                psiClass.getResolveScope()
-                                                                                        )
-                                                                                ));
-                                                                            }
-                                                                        }
-                                                                    });
-                                                                }
-                                                            })
-                                                            .addAction(new com.intellij.notification.NotificationAction("取消") {
-                                                                @Override
-                                                                public void actionPerformed(@NotNull com.intellij.notification.Notification notification, @NotNull com.intellij.openapi.actionSystem.AnActionEvent e) {
-                                                                    notification.expire();
-                                                                }
-                                                            })
                                                             .notify(psiClass.getProject());
+                                                    });
                                                 }
                                             });
                                         }));

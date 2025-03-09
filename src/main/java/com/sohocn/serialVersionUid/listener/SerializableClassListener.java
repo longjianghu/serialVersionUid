@@ -90,14 +90,14 @@ public class SerializableClassListener implements PsiTreeChangePreprocessor {
                         com.intellij.notification.NotificationType.INFORMATION)
                 .addAction(new com.intellij.notification.NotificationAction("生成") {
                     @Override
-                    public void actionPerformed(@NotNull com.intellij.notification.Notification notification, @NotNull com.intellij.openapi.actionSystem.AnActionEvent e) {
+                    public void actionPerformed(@NotNull com.intellij.openapi.actionSystem.AnActionEvent e, @NotNull com.intellij.notification.Notification notification) {
                         notification.expire();
                         generateSerialVersionUID(psiClass);
                     }
                 })
                 .addAction(new com.intellij.notification.NotificationAction("取消") {
                     @Override
-                    public void actionPerformed(@NotNull com.intellij.notification.Notification notification, @NotNull com.intellij.openapi.actionSystem.AnActionEvent e) {
+                    public void actionPerformed(@NotNull com.intellij.openapi.actionSystem.AnActionEvent e, @NotNull com.intellij.notification.Notification notification) {
                         notification.expire();
                     }
                 })
