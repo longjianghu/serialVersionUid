@@ -8,27 +8,21 @@ import com.intellij.psi.*;
 import com.sohocn.serialVersionUid.util.SerialVersionUIDGenerator;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * 监听Serializable接口的实现，并提示生成serialVersionUID
  */
 public class SerializableImplementationListener implements ImplicitUsageProvider {
 
+    // 用于跟踪已经显示过通知的类，避免重复显示
+    private static final Set<String> notifiedClasses = new HashSet<>();
+
     @Override
     public boolean isImplicitUsage(@NotNull PsiElement element) {
-        if (element instanceof PsiClass) {
-            PsiClass psiClass = (PsiClass) element;
-            // 检查类是否实现了Serializable接口
-            if (SerialVersionUIDGenerator.isSerializable(psiClass) && !SerialVersionUIDGenerator.hasSerialVersionUID(psiClass)) {
-                // 显示提示，询问用户是否生成serialVersionUID
-                ApplicationManager.getApplication().invokeLater(() -> {
-                    Project project = element.getProject();
-                    if (project.isDisposed() || !psiClass.isValid()) return;
-                    
-                    // 显示提示，询问用户是否生成serialVersionUID
-                    showSerialVersionUIDNotification(project, psiClass);
-                });
-            }
-        }
+        // 已禁用自动提示生成serialVersionUID功能
+        // 原有检查类是否实现Serializable接口并显示通知的代码已被移除
         return false;
     }
 
@@ -46,6 +40,20 @@ public class SerializableImplementationListener implements ImplicitUsageProvider
      * 显示通知，询问用户是否生成serialVersionUID
      */
     private void showSerialVersionUIDNotification(Project project, PsiClass psiClass) {
+        // 获取类的完全限定名
+        String qualifiedName = psiClass.getQualifiedName();
+        if (qualifiedName == null) {
+            qualifiedName = psiClass.getName(); // 如果无法获取完全限定名，则使用简单类名
+        }
+        
+        // 检查是否已经显示过通知
+        if (notifiedClasses.contains(qualifiedName)) {
+            return; // 如果已经显示过通知，则不再显示
+        }
+        
+        // 添加到已通知集合
+        notifiedClasses.add(qualifiedName);
+        
         com.intellij.notification.NotificationGroupManager.getInstance()
                 .getNotificationGroup("SerialVersionUID Generator")
                 .createNotification(

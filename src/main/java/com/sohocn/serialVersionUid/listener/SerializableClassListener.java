@@ -10,6 +10,9 @@ import com.intellij.psi.impl.PsiTreeChangePreprocessor;
 import com.sohocn.serialVersionUid.util.SerialVersionUIDGenerator;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * 监听Java类的变化，特别是当类实现了Serializable接口时
  * 自动提示生成serialVersionUID
@@ -17,6 +20,9 @@ import org.jetbrains.annotations.NotNull;
 public class SerializableClassListener implements PsiTreeChangePreprocessor {
 
     private final Project myProject;
+    
+    // 用于跟踪已经显示过通知的类，避免重复显示
+    private static final Set<String> notifiedClasses = new HashSet<>();
 
     public SerializableClassListener(Project project) {
         myProject = project;
@@ -43,45 +49,29 @@ public class SerializableClassListener implements PsiTreeChangePreprocessor {
             return;
         }
 
-        // 检查是否是实现列表的变化
-        if (child instanceof PsiReferenceList) {
-            PsiReferenceList referenceList = (PsiReferenceList) child;
-            if (referenceList.getRole() == PsiReferenceList.Role.IMPLEMENTS_LIST) {
-                // 获取包含的类
-                PsiClass psiClass = PsiTreeUtil.getParentOfType(referenceList, PsiClass.class);
-                if (psiClass != null) {
-                    // 检查类是否实现了Serializable接口
-                    if (SerialVersionUIDGenerator.isSerializable(psiClass) && !SerialVersionUIDGenerator.hasSerialVersionUID(psiClass)) {
-                        // 显示提示，询问用户是否生成serialVersionUID
-                        ApplicationManager.getApplication().invokeLater(() -> {
-                            if (psiClass.isValid() && !myProject.isDisposed()) {
-                                showSerialVersionUIDNotification(psiClass);
-                            }
-                        });
-                    }
-                }
-            }
-        }
-
-        // 检查是否是类的变化
-        PsiClass psiClass = PsiTreeUtil.getParentOfType(child, PsiClass.class);
-        if (psiClass != null) {
-            // 检查类是否实现了Serializable接口
-            if (SerialVersionUIDGenerator.isSerializable(psiClass) && !SerialVersionUIDGenerator.hasSerialVersionUID(psiClass)) {
-                // 显示提示，询问用户是否生成serialVersionUID
-                ApplicationManager.getApplication().invokeLater(() -> {
-                    if (psiClass.isValid() && !myProject.isDisposed()) {
-                        showSerialVersionUIDNotification(psiClass);
-                    }
-                });
-            }
-        }
+        // 不再显示提示，已禁用自动提示生成serialVersionUID功能
+        // 原有检查实现列表变化和类变化的代码已被移除
     }
 
     /**
      * 显示通知，询问用户是否生成serialVersionUID
      */
     private void showSerialVersionUIDNotification(PsiClass psiClass) {
+        // 获取类的完全限定名
+        String qualifiedName = psiClass.getQualifiedName();
+        if (qualifiedName == null) {
+            qualifiedName = psiClass.getName(); // 如果无法获取完全限定名，则使用简单类名
+        }
+        
+        // 检查是否已经显示过通知
+        if (notifiedClasses.contains(qualifiedName)) {
+            return; // 如果已经显示过通知，则不再显示
+        }
+        
+        // 添加到已通知集合
+        notifiedClasses.add(qualifiedName);
+        
+        // 显示通知
         com.intellij.notification.NotificationGroupManager.getInstance()
                 .getNotificationGroup("SerialVersionUID Generator")
                 .createNotification(
