@@ -4,7 +4,7 @@
     <vendor email="215241062@qq.com">龙江湖</vendor>
     <description><![CDATA[
                   <p>自动为实现Serializable接口的类生成serialVersionUID，可以按快捷键快捷添加 Windows/Linux:Alt+s Mac:Command+N</p>
-                  <p>**Automatically generate `serialVersionUID` for classes implementing the `Serializable` interface, with quick access via shortcuts: Windows/Linux: `Alt+S`, Mac: `Command+N`.**</p>
+                  <p>Automatically generate `serialVersionUID` for classes implementing the `Serializable` interface, with quick access via shortcuts: Windows/Linux: `Alt+S`, Mac: `Command+N`.</p>
 ]]></description>
     <change-notes><![CDATA[
     <h2>1.0.0</h2>
