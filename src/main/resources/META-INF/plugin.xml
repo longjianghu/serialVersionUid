@@ -2,15 +2,7 @@
     <id>com.sohocn.serialVersionUid</id>
     <name>SerialVersionUID Generator</name>
     <vendor email="215241062@qq.com">龙江湖</vendor>
-    <description><![CDATA[
-    <h2>1.0.0</h2>
-    <ul>
-     <li>为实现Serializable接口的类生成serialVersionUID(鼠标右键菜单添加)</li>
-     <li>Java版本14+会添加@Serial注解</li>
-     <li>Generate serialVersionUID for classes implementing Serializable interface (added via right-click menu).</li>
-     <li>Java 14+ will add the @Serial annotation.</li>
-    </ul>
-    ]]></description>
+    <description><![CDATA[自动为实现Serializable接口的类生成serialVersionUID]]></description>
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
@@ -32,6 +24,9 @@
                 description="Generate serialVersionUID for Serializable class">
             <add-to-group group-id="GenerateGroup" anchor="last"/>
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="alt S"/>
+            <keyboard-shortcut keymap="Mac OS X" first-keystroke="meta N"/>
+            <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="meta N"/>
         </action>
     </actions>
 </idea-plugin>
