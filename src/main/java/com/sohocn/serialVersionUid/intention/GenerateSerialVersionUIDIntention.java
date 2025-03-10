@@ -99,27 +99,22 @@ public class GenerateSerialVersionUIDIntention extends PsiElementBaseIntentionAc
      * 查找添加字段的位置，确保serialVersionUID字段位于类的所有字段之前
      */
     private PsiElement findAnchor(PsiClass psiClass) {
-        // 获取类的所有字段
-        PsiField[] fields = psiClass.getFields();
-        if (fields.length > 0) {
-            // 返回第一个字段，确保serialVersionUID字段位于类的所有字段之前
-            return fields[0];
-        }
+        // 获取类的第一个代码元素作为锚点
+        PsiElement firstCodeElement = null;
         
-        // 如果没有字段，则获取类的所有方法
-        PsiMethod[] methods = psiClass.getMethods();
-        if (methods.length > 0) {
-            // 返回第一个方法，确保serialVersionUID字段位于类的所有方法之前
-            return methods[0];
-        }
-        
-        // 如果没有字段和方法，则获取类的所有子元素
-        PsiElement[] children = psiClass.getChildren();
-        for (PsiElement child : children) {
-            // 跳过注释、空白等非代码元素
-            if (child instanceof PsiField || child instanceof PsiMethod || child instanceof PsiClass) {
-                return child;
+        // 遍历类的所有子元素，找到第一个有效的代码元素
+        for (PsiElement child : psiClass.getChildren()) {
+            // 检查元素是否是有效的代码元素，并且确保它是类的直接子元素
+            if ((child instanceof PsiField || child instanceof PsiMethod || child instanceof PsiClass) && 
+                child.getParent() == psiClass) {
+                firstCodeElement = child;
+                break;
             }
+        }
+        
+        // 如果找到了有效的锚点，返回它
+        if (firstCodeElement != null) {
+            return firstCodeElement;
         }
         
         return null;
