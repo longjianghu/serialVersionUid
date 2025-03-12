@@ -9,8 +9,8 @@
     <change-notes><![CDATA[
     <h2>1.1.0</h2>
     <ul>
-        <li>调整快捷键 Windows/Linux:Alt+Shift+s Mac:Command+N</li>
-        <li>Adjusted shortcut keys: Windows/Linux: Alt+Shift+S, Mac: Command+N</li>
+        <li>调整快捷键 Windows/Linux:Alt+Shift+s Mac:Meta+Shift+S</li>
+        <li>Adjusted shortcut keys: Windows/Linux: Alt+Shift+S, Mac: Meta+Shift+S</li>
     </ul>
     <h2>1.0.0</h2>
     <ul>
@@ -29,6 +29,7 @@
         <completion.contributor language="JAVA"
                                 implementationClass="com.sohocn.serialVersionUid.completion.SerialVersionUIDCompletionContributor"/>
         <intentionAction>
+            <language>JAVA</language>
             <className>com.sohocn.serialVersionUid.intention.GenerateSerialVersionUIDIntention</className>
             <category>Serialization</category>
         </intentionAction>
@@ -41,8 +42,7 @@
             <add-to-group group-id="GenerateGroup" anchor="last"/>
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             <keyboard-shortcut keymap="$default" first-keystroke="alt shift S"/>
-            <keyboard-shortcut keymap="Mac OS X" first-keystroke="meta N"/>
-            <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="meta N"/>
+            <keyboard-shortcut keymap="Mac OS X" first-keystroke="meta shift S"/>
         </action>
     </actions>
 </idea-plugin>
