@@ -7,13 +7,18 @@
                   <p>Automatically generate `serialVersionUID` for classes implementing the `Serializable` interface, with quick access via shortcuts: Windows/Linux: `Alt+S`, Mac: `Command+N`.</p>
 ]]></description>
     <change-notes><![CDATA[
+    <h2>1.1.0</h2>
+    <ul>
+        <li>调整快捷键 Windows/Linux:Alt+Shift+s Mac:Command+N</li>
+        <li>Adjusted shortcut keys: Windows/Linux: Alt+Shift+S, Mac: Command+N</li>
+    </ul>
     <h2>1.0.0</h2>
     <ul>
-     <li>为实现Serializable接口的类生成serialVersionUID(鼠标右键菜单添加)</li>
-     <li>Java版本14+会添加@Serial注解</li>
-     <li>可以按快捷键快捷添加 Windows/Linux:Alt+s Mac:Command+N</li>
-     <li>Generate serialVersionUID for classes implementing Serializable interface (added via right-click menu).</li>
-     <li>Java 14+ will add the @Serial annotation.</li>
+        <li>为实现Serializable接口的类生成serialVersionUID(鼠标右键菜单添加)</li>
+        <li>Java版本14+会添加@Serial注解</li>
+        <li>可以按快捷键快捷添加 Windows/Linux:Alt+s Mac:Command+N</li>
+        <li>Generate serialVersionUID for classes implementing Serializable interface (added via right-click menu).</li>
+        <li>Java 14+ will add the @Serial annotation.</li>
     </ul>
     ]]></change-notes>
     <depends>com.intellij.modules.platform</depends>
@@ -28,7 +33,6 @@
             <category>Serialization</category>
         </intentionAction>
     </extensions>
-
     <actions>
         <action id="com.sohocn.serialVersionUid.GenerateSerialVersionUID"
                 class="com.sohocn.serialVersionUid.action.GenerateSerialVersionUIDAction"
@@ -36,7 +40,7 @@
                 description="Generate serialVersionUID for Serializable class">
             <add-to-group group-id="GenerateGroup" anchor="last"/>
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
-            <keyboard-shortcut keymap="$default" first-keystroke="alt S"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="alt shift S"/>
             <keyboard-shortcut keymap="Mac OS X" first-keystroke="meta N"/>
             <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="meta N"/>
         </action>
