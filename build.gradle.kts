@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.sohocn"
-version = "1.0.0"
+version = "1.1.0"
 
 repositories {
     mavenCentral()
@@ -34,7 +34,7 @@ tasks {
     }
 
     patchPluginXml {
-        sinceBuild.set("241")
+        sinceBuild.set("233")
         untilBuild.set("243.*")
     }
 
