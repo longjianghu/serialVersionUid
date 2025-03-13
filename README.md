@@ -4,56 +4,32 @@
 
 ## 功能特点
 
-- 自动为实现`Serializable`接口的类添加`serialVersionUID`字段
-- 当用户继承`Serializable`接口时提示是否自动生成serialVersionUID变量（使用自动完成，当用户按Tab自完成后自动添加serialVersionUID）
-- 在编辑器右键菜单中提供生成`serialVersionUID`的选项
-- 根据Java SDK版本决定是否添加@Serial注解并引入类文件（Java 14+）
+- 当用户在接口列表中输入`Serializable`时，按Tab键自动补全接口名称并自动生成`serialVersionUID`字段
+- 根据Java SDK版本智能决定是否添加`@Serial`注解（Java 14+）
+- 如果用户没有引用`Serializable`和`Serial`类文件，则自动导入（如果存在则不导入）
+- 在编辑器的右键菜单提供`SerialVersionUID`菜单项
+- 当多次触发时,如果相关的字段、注解和文件存在(不存在根据上面的规则进行自动实全),智能判断是否需要更新`serialVersionUID`值
+- 用户可以通过快捷键（Alt+Shift+S/Linux）或Command+N（Mac）进行触发
 
 ## 使用方法
 
-### 方法1：自动生成
+### 方法1：使用自动完成
 
-当您在类中实现Serializable接口时，插件会自动为您生成serialVersionUID字段。
-
-### 方法2：使用自动完成
-
-当您在类的实现接口列表中输入"Serializable"时，代码完成会提示您选择"Serializable (with serialVersionUID)"选项，选择后会自动添加serialVersionUID字段。
-
-### 方法3：使用右键菜单
-
-1. 在实现了Serializable接口的类中，右键点击编辑器
-2. 在弹出的菜单中选择"生成 serialVersionUID"选项
-
-### 方法4：使用意图动作（Intention Action）
-
-1. 在实现了Serializable接口的类中，将光标放在类的任意位置
-2. 按下Alt+Enter（Windows/Linux）或Option+Enter（Mac）
-3. 选择"生成 serialVersionUID"选项
-
-### 方法5：使用字段代码完成
-
-1. 在实现了Serializable接口的类中，开始输入"serialVersionUID"
-2. 在代码完成列表中选择serialVersionUID选项
-
-### 方法6：通过检查器自动提示
-
-插件会自动检测实现了Serializable接口但没有serialVersionUID字段的类，并在编辑器中显示警告。
-点击警告上的快速修复选项，可以自动添加serialVersionUID字段。
+在已实现`Serializable`接口的类中，输入`serialVersionUID`并使用代码补全功能，选择"serialVersionUID (generate field)"
+选项即可自动生成完整的serialVersionUID字段。
 
 ## 生成算法
 
-插件使用类的结构信息（类名、修饰符、接口、字段和方法）生成一个唯一的哈希值作为serialVersionUID。
-这确保了只要类的结构不变，生成的serialVersionUID就不会改变。
+插件使用类的结构信息（类名、修饰符、接口、字段和方法）生成一个唯一的哈希值作为serialVersionUID。这确保了只要类的结构不变，生成的serialVersionUID就不会改变，符合Java序列化规范。
 
 ## 注意事项
 
-- 只有在Java SDK版本大于等于14时，才会添加@Serial注解
-- 在较低版本的Java中，将只生成serialVersionUID字段，不添加注解
+- 导入文件时注意不要重复导入
 
-## 要求
+## 兼容性
 
-- IntelliJ IDEA 2023.1或更高版本
-- Java 17或更高版本
+- 插件兼容IntelliJ IDEA 2023.1及以上版本
+- 支持所有基于IntelliJ平台且包含Java支持的IDE（如WebStorm、Android Studio等）
 
 ## 许可证
 

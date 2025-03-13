@@ -1,27 +1,49 @@
 <idea-plugin>
-    <id>com.sohoch.serialVersionUid</id>
+    <id>com.sohocn.serialVersionUid</id>
     <name>SerialVersionUID Generator</name>
-    <vendor email="215241062@qq.com" url="http://wwww.sohocn.net">龙江湖</vendor>
-    <description>自动为实现Serializable接口的类生成serialVersionUID字段</description>
-
+    <vendor email="215241062@qq.com">龙江湖</vendor>
+    <idea-version since-build="231" until-build="243.*"/>
+    <description><![CDATA[
+                  <p>自动为实现Serializable接口的类生成serialVersionUID，可以按快捷键快捷添加 Windows/Linux:Alt+s Mac:Command+N</p>
+                  <p>Automatically generate `serialVersionUID` for classes implementing the `Serializable` interface, with quick access via shortcuts: Windows/Linux: `Alt+S`, Mac: `Command+N`.</p>
+]]></description>
+    <change-notes><![CDATA[
+    <h2>1.1.0</h2>
+    <ul>
+        <li>调整快捷键 Windows/Linux:Alt+insert</li>
+        <li>Adjusted shortcut keys: Windows/Linux: Alt+insert</li>
+    </ul>
+    <h2>1.0.0</h2>
+    <ul>
+        <li>为实现Serializable接口的类生成serialVersionUID(鼠标右键菜单添加)</li>
+        <li>Java版本14+会添加@Serial注解</li>
+        <li>可以按快捷键快捷添加 Windows/Linux:Alt+s Mac:Command+N</li>
+        <li>Generate serialVersionUID for classes implementing Serializable interface (added via right-click menu).</li>
+        <li>Java 14+ will add the @Serial annotation.</li>
+    </ul>
+    ]]></change-notes>
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <completion.contributor language="JAVA" 
-            implementationClass="com.sohoch.serialVersionUid.completion.SerialVersionUIDCompletionContributor"/>
+        <notificationGroup id="SerialVersionUID Generator" displayType="BALLOON"/>
+        <completion.contributor language="JAVA"
+                                implementationClass="com.sohocn.serialVersionUid.completion.SerialVersionUIDCompletionContributor"/>
         <intentionAction>
-            <className>com.sohoch.serialVersionUid.intention.GenerateSerialVersionUIDIntention</className>
-            <category>Java/Serialization</category>
+            <language>JAVA</language>
+            <className>com.sohocn.serialVersionUid.intention.GenerateSerialVersionUIDIntention</className>
+            <category>Serialization</category>
         </intentionAction>
     </extensions>
-
     <actions>
-        <action id="GenerateSerialVersionUID" 
-                class="com.sohoch.serialVersionUid.action.GenerateSerialVersionUIDAction"
+        <action id="com.sohocn.serialVersionUid.GenerateSerialVersionUID"
+                class="com.sohocn.serialVersionUid.action.GenerateSerialVersionUIDAction"
                 text="SerialVersionUID"
                 description="Generate serialVersionUID for Serializable class">
             <add-to-group group-id="GenerateGroup" anchor="last"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="alt INSERT"/>
+            <keyboard-shortcut keymap="Mac OS X" first-keystroke="meta n"/>
         </action>
     </actions>
 </idea-plugin>
