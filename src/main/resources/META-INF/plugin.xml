@@ -10,8 +10,8 @@
     <change-notes><![CDATA[
     <h2>1.1.0</h2>
     <ul>
-        <li>调整快捷键 Windows/Linux:Alt+Insert</li>
-        <li>Adjusted shortcut keys: Windows/Linux: Alt+Insert</li>
+        <li>调整快捷键 Windows/Linux:Alt+insert</li>
+        <li>Adjusted shortcut keys: Windows/Linux: Alt+insert</li>
     </ul>
     <h2>1.0.0</h2>
     <ul>
@@ -42,7 +42,7 @@
                 description="Generate serialVersionUID for Serializable class">
             <add-to-group group-id="GenerateGroup" anchor="last"/>
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
-            <keyboard-shortcut keymap="$default" first-keystroke="alt insert"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="alt INSERT"/>
             <keyboard-shortcut keymap="Mac OS X" first-keystroke="meta n"/>
         </action>
     </actions>
