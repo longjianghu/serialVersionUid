@@ -2,12 +2,16 @@
     <id>com.sohocn.serialVersionUid</id>
     <name>SerialVersionUID Generator</name>
     <vendor email="215241062@qq.com">龙江湖</vendor>
-    <idea-version since-build="231" until-build="243.*"/>
+    <idea-version since-build="231" until-build="251.*"/>
     <description><![CDATA[
                   <p>自动为实现Serializable接口的类生成serialVersionUID，可以按快捷键快捷添加 Windows/Linux:Alt+s Mac:Command+N</p>
                   <p>Automatically generate `serialVersionUID` for classes implementing the `Serializable` interface, with quick access via shortcuts: Windows/Linux: `Alt+S`, Mac: `Command+N`.</p>
 ]]></description>
     <change-notes><![CDATA[
+    <h2>1.1.1</h2>
+    <ul>
+        <li>兼容最新版的IDEA(2025)版本</li>
+    </ul>
     <h2>1.1.0</h2>
     <ul>
         <li>调整快捷键 Windows/Linux:Alt+insert</li>
