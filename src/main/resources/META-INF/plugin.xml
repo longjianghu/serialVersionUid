@@ -4,26 +4,27 @@
     <vendor email="215241062@qq.com">龙江湖</vendor>
     <idea-version since-build="231" until-build="251.*"/>
     <description><![CDATA[
-                  <p>自动为实现Serializable接口的类生成serialVersionUID，可以按快捷键快捷添加 Windows/Linux:Alt+s Mac:Command+N</p>
-                  <p>Automatically generate `serialVersionUID` for classes implementing the `Serializable` interface, with quick access via shortcuts: Windows/Linux: `Alt+S`, Mac: `Command+N`.</p>
+        <p>Automatically generate `serialVersionUID` for classes implementing the `Serializable` interface, with quick access via shortcuts: Windows/Linux: `Alt+S`, Mac: `Command+N`.</p>
+        <p>自动为实现Serializable接口的类生成serialVersionUID，可以按快捷键快捷添加 Windows/Linux:Alt+s Mac:Command+N</p>
 ]]></description>
     <change-notes><![CDATA[
     <h2>1.1.1</h2>
     <ul>
-        <li>兼容最新版的IDEA(2025)版本</li>
+        <li>Compatible with the latest IDEA (2025.1) version</li>
+        <li>兼容最新版的IDEA(2025.1)版本</li>
     </ul>
     <h2>1.1.0</h2>
     <ul>
+     <li>Adjusted shortcut keys: Windows/Linux: Alt+insert</li>
         <li>调整快捷键 Windows/Linux:Alt+insert</li>
-        <li>Adjusted shortcut keys: Windows/Linux: Alt+insert</li>
     </ul>
     <h2>1.0.0</h2>
     <ul>
+     <li>Generate serialVersionUID for classes implementing Serializable interface (added via right-click menu).</li>
+        <li>Java 14+ will add the @Serial annotation.</li>
         <li>为实现Serializable接口的类生成serialVersionUID(鼠标右键菜单添加)</li>
         <li>Java版本14+会添加@Serial注解</li>
         <li>可以按快捷键快捷添加 Windows/Linux:Alt+s Mac:Command+N</li>
-        <li>Generate serialVersionUID for classes implementing Serializable interface (added via right-click menu).</li>
-        <li>Java 14+ will add the @Serial annotation.</li>
     </ul>
     ]]></change-notes>
     <depends>com.intellij.modules.platform</depends>
