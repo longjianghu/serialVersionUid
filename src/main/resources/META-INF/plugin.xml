@@ -8,6 +8,16 @@
         <p>自动为实现Serializable接口的类生成serialVersionUID，可以按快捷键快捷添加 Windows/Linux:Alt+s Mac:Command+N</p>
 ]]></description>
     <change-notes><![CDATA[
+    <h2>1.1.3</h2>
+    <ul>
+       <li>Fix the bug discovered in the automatic addition of the @Serial annotation.</li>
+        <li>修复自动添加@Serial注解发现的BUG.</li>
+    </ul>
+     <h2>1.1.2</h2>
+    <ul>
+        <li>Compatible with the latest IDEA (2025.2) version</li>
+        <li>兼容最新版的IDEA(2025.2)版本</li>
+    </ul>
     <h2>1.1.1</h2>
     <ul>
         <li>Compatible with the latest IDEA (2025.1) version</li>

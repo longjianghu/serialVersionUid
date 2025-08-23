@@ -1,9 +1,5 @@
 package com.sohocn.serialVersionUid.util;
 
-import com.intellij.openapi.project.Project;
-import com.intellij.psi.*;
-import com.intellij.psi.search.GlobalSearchScope;
-
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -12,6 +8,10 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import com.intellij.openapi.project.Project;
+import com.intellij.psi.*;
+import com.intellij.psi.search.GlobalSearchScope;
 
 /**
  * 生成serialVersionUID的工具类
@@ -205,44 +205,12 @@ public class SerialVersionUIDGenerator {
      * @return 如果应该使用@Serial注解则返回true，否则返回false
      */
     public static boolean shouldUseSerialAnnotation(Project project) {
-        // 获取项目的Java版本
-        JavaPsiFacade javaPsiFacade = JavaPsiFacade.getInstance(project);
-        PsiElementFactory factory = javaPsiFacade.getElementFactory();
-        
-        try {
-            // 尝试创建一个@Serial注解，如果成功则表示当前Java版本支持该注解
-            PsiClass serialClass = javaPsiFacade.findClass("java.io.Serial", GlobalSearchScope.allScope(project));
-            if (serialClass == null || !serialClass.isAnnotationType()) {
-                return false; // Serial注解不存在或不是注解类型
-            }
-            
-            // 检查Java版本是否为14及以上
-            String javaVersion = System.getProperty("java.version");
-            if (javaVersion != null) {
-                // 提取主版本号
-                if (javaVersion.startsWith("1.")) {
-                    // 旧版本格式: 1.8.x
-                    javaVersion = javaVersion.substring(2, 3);
-                } else {
-                    // 新版本格式: 11.x, 14.x
-                    int dotIndex = javaVersion.indexOf(".");
-                    if (dotIndex != -1) {
-                        javaVersion = javaVersion.substring(0, dotIndex);
-                    }
-                }
-                
-                try {
-                    int version = Integer.parseInt(javaVersion);
-                    return version >= 14; // 只在Java 14及以上版本使用@Serial注解
-                } catch (NumberFormatException e) {
-                    return false;
-                }
-            }
-            
-            return false;
-        } catch (Exception e) {
+        if (project == null || project.isDisposed()) {
             return false;
         }
+
+        return JavaPsiFacade.getInstance(project)
+                .findClass("java.io.Serial", GlobalSearchScope.allScope(project)) != null;
     }
 
     /**
