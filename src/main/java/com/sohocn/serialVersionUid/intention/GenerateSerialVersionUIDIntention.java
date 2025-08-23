@@ -32,9 +32,9 @@ public class GenerateSerialVersionUIDIntention extends PsiElementBaseIntentionAc
         if (psiClass == null) {
             return false;
         }
-
-        // 检查类是否实现了Serializable接口（无论是否已有serialVersionUID字段）
-        return SerialVersionUIDGenerator.isSerializable(psiClass);
+    
+        // 移除Serializable接口检查，对所有类都可用
+        return true;
     }
 
     @Override
@@ -44,12 +44,14 @@ public class GenerateSerialVersionUIDIntention extends PsiElementBaseIntentionAc
         if (psiClass == null) {
             return;
         }
-
-        // 生成serialVersionUID字段
-        String serialVersionUIDCode = SerialVersionUIDGenerator.generateSerialVersionUID(psiClass);
+    
+        // 使用新的完整生成方法，会自动添加Serializable接口（如果需要）
+        String serialVersionUIDCode = SerialVersionUIDGenerator.generateCompleteSerialVersionUID(psiClass);
         PsiElementFactory factory = JavaPsiFacade.getElementFactory(project);
+    
+        // 生成serialVersionUID字段
         PsiField field = factory.createFieldFromText(serialVersionUIDCode, psiClass);
-
+    
         // 检查是否已存在serialVersionUID字段
         if (SerialVersionUIDGenerator.hasSerialVersionUID(psiClass)) {
             // 查找现有的serialVersionUID字段并替换
@@ -69,7 +71,7 @@ public class GenerateSerialVersionUIDIntention extends PsiElementBaseIntentionAc
                 psiClass.add(field);
             }
         }
-
+    
         // 添加必要的导入语句
         boolean useSerialAnnotation = SerialVersionUIDGenerator.shouldUseSerialAnnotation(project);
         if (useSerialAnnotation) {

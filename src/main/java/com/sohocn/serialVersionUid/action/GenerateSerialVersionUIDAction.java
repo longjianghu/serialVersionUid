@@ -22,16 +22,13 @@ public class GenerateSerialVersionUIDAction extends BaseGenerateAction {
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         Project project = e.getProject();
-        if (project == null) {
-            return;
-        }
-
         Editor editor = e.getData(CommonDataKeys.EDITOR);
         PsiFile file = e.getData(CommonDataKeys.PSI_FILE);
-        if (editor == null || file == null) {
+    
+        if (project == null || editor == null || file == null || !(file instanceof PsiJavaFile)) {
             return;
         }
-
+    
         // 获取当前光标位置的类
         int offset = editor.getCaretModel().getOffset();
         PsiElement element = file.findElementAt(offset);
@@ -39,73 +36,71 @@ public class GenerateSerialVersionUIDAction extends BaseGenerateAction {
         if (psiClass == null) {
             return;
         }
-
-        // 检查类是否实现了Serializable接口
-        if (!SerialVersionUIDGenerator.isSerializable(psiClass)) {
-            return;
-        }
-
-        // 生成serialVersionUID字段
-        String serialVersionUIDCode = SerialVersionUIDGenerator.generateSerialVersionUID(psiClass);
+    
+        // 生成serialVersionUID字段代码（不修改PSI）
+        String serialVersionUIDCode = SerialVersionUIDGenerator.generateCompleteSerialVersionUID(psiClass);
         PsiElementFactory factory = JavaPsiFacade.getElementFactory(project);
         PsiField field = factory.createFieldFromText(serialVersionUIDCode, psiClass);
-
-        // 使用WriteCommandAction包装PSI修改操作
+    
+        // 使用WriteCommandAction包装所有PSI修改操作
         String commandName = SerialVersionUIDGenerator.hasSerialVersionUID(psiClass) ? "Update serialVersionUID" : "Generate serialVersionUID";
         com.intellij.openapi.command.WriteCommandAction.runWriteCommandAction(project, commandName, null, () -> {
-            // 检查是否已存在serialVersionUID字段
-            if (SerialVersionUIDGenerator.hasSerialVersionUID(psiClass)) {
-                // 查找现有的serialVersionUID字段并替换
-                PsiField[] fields = psiClass.getFields();
-                for (PsiField existingField : fields) {
-                    if ("serialVersionUID".equals(existingField.getName())) {
-                        existingField.replace(field);
-                        break;
-                    }
+        // 首先确保类实现了Serializable接口
+        SerialVersionUIDGenerator.addSerializableInterface(psiClass, project);
+        
+        // 检查是否已存在serialVersionUID字段
+        if (SerialVersionUIDGenerator.hasSerialVersionUID(psiClass)) {
+            // 查找现有的serialVersionUID字段并替换
+            PsiField[] fields = psiClass.getFields();
+            for (PsiField existingField : fields) {
+                if ("serialVersionUID".equals(existingField.getName())) {
+                    existingField.replace(field);
+                    break;
                 }
+            }
+        } else {
+            // 添加字段到类中
+            PsiElement anchor = findAnchor(psiClass);
+            if (anchor != null) {
+                psiClass.addBefore(field, anchor);
             } else {
-                // 添加字段到类中
-                PsiElement anchor = findAnchor(psiClass);
-                if (anchor != null) {
-                    psiClass.addBefore(field, anchor);
-                } else {
-                    psiClass.add(field);
-                }
+                psiClass.add(field);
             }
-
-            // 添加必要的导入语句
-            boolean useSerialAnnotation = SerialVersionUIDGenerator.shouldUseSerialAnnotation(project);
-            if (useSerialAnnotation) {
-                if (file instanceof PsiJavaFile) {
-                    PsiJavaFile javaFile = (PsiJavaFile) file;
-                    PsiImportList importList = javaFile.getImportList();
-                    if (importList != null && !SerialVersionUIDGenerator.hasImport(importList, "java.io.Serial")) {
-                        PsiClass serialClass = JavaPsiFacade.getInstance(project).findClass(
-                                "java.io.Serial",
-                                psiClass.getResolveScope()
-                        );
-                        if (serialClass != null) {
-                            importList.add(factory.createImportStatement(serialClass));
-                        }
+        }
+    
+        // 添加必要的导入语句
+        boolean useSerialAnnotation = SerialVersionUIDGenerator.shouldUseSerialAnnotation(project);
+        if (useSerialAnnotation) {
+            if (file instanceof PsiJavaFile) {
+                PsiJavaFile javaFile = (PsiJavaFile) file;
+                PsiImportList importList = javaFile.getImportList();
+                if (importList != null && !SerialVersionUIDGenerator.hasImport(importList, "java.io.Serial")) {
+                    PsiClass serialClass = JavaPsiFacade.getInstance(project).findClass(
+                            "java.io.Serial",
+                            psiClass.getResolveScope()
+                    );
+                    if (serialClass != null) {
+                        importList.add(factory.createImportStatement(serialClass));
                     }
                 }
             }
-        });
-    }
+        }
+    });
+}
 
     @Override
     public void update(@NotNull AnActionEvent e) {
         Project project = e.getProject();
         Editor editor = e.getData(CommonDataKeys.EDITOR);
         PsiFile file = e.getData(CommonDataKeys.PSI_FILE);
-
+    
         // 禁用菜单项，直到我们确认当前位置有一个可以添加或更新serialVersionUID的类
         e.getPresentation().setEnabled(false);
-
+    
         if (project == null || editor == null || file == null || !(file instanceof PsiJavaFile)) {
             return;
         }
-
+    
         // 获取当前光标位置的类
         int offset = editor.getCaretModel().getOffset();
         PsiElement element = file.findElementAt(offset);
@@ -113,14 +108,12 @@ public class GenerateSerialVersionUIDAction extends BaseGenerateAction {
         if (psiClass == null) {
             return;
         }
-
-        // 检查类是否实现了Serializable接口（无论是否已有serialVersionUID字段）
-        if (SerialVersionUIDGenerator.isSerializable(psiClass)) {
-            // 根据是否已有serialVersionUID字段设置不同的菜单文本
-            boolean hasSerialVersionUID = SerialVersionUIDGenerator.hasSerialVersionUID(psiClass);
-            e.getPresentation().setText(hasSerialVersionUID ? "Update SerialVersionUID" : "Generate SerialVersionUID");
-            e.getPresentation().setEnabled(true);
-        }
+    
+        // 移除Serializable接口检查，对所有类都显示菜单
+        // 根据是否已有serialVersionUID字段设置不同的菜单文本
+        boolean hasSerialVersionUID = SerialVersionUIDGenerator.hasSerialVersionUID(psiClass);
+        e.getPresentation().setText(hasSerialVersionUID ? "Update SerialVersionUID" : "Generate SerialVersionUID");
+        e.getPresentation().setEnabled(true);
     }
 
     /**

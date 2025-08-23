@@ -10,8 +10,8 @@
     <change-notes><![CDATA[
     <h2>1.1.3</h2>
     <ul>
-       <li>Fix the bug discovered in the automatic addition of the @Serial annotation.</li>
-        <li>修复自动添加@Serial注解发现的BUG.</li>
+       <li>Optimizing the serialVersionUID generation logic (automatically implementing the Serializable interface).</li>
+        <li>优化serialVersionUID生成处理逻辑(自动实现Serializable接口)!</li>
     </ul>
      <h2>1.1.2</h2>
     <ul>
