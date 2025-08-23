@@ -214,19 +214,6 @@ public class SerialVersionUIDGenerator {
     }
 
     /**
-     * 获取需要导入的包列表
-     *
-     * @param useSerialAnnotation 是否使用@Serial注解
-     * @return 需要导入的包列表
-     */
-    public static List<String> getImportsToAdd(boolean useSerialAnnotation) {
-        if (useSerialAnnotation) {
-            return Collections.singletonList("java.io.Serial");
-        }
-        return Collections.emptyList();
-    }
-    
-    /**
      * 检查导入语句是否已存在
      * 
      * @param importList 导入列表
