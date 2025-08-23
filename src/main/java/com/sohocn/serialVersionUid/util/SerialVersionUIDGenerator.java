@@ -242,52 +242,107 @@ public class SerialVersionUIDGenerator {
      * @param project 当前项目
      */
     public static void addSerializableInterface(PsiClass psiClass, Project project) {
-        // 如果已经实现了Serializable接口，则不执行任何操作
         if (isSerializable(psiClass)) {
             return;
         }
 
         PsiElementFactory factory = JavaPsiFacade.getElementFactory(project);
 
-        // 先添加import语句 - 使用具体的类导入而不是通配符导入
         PsiFile containingFile = psiClass.getContainingFile();
         if (containingFile instanceof PsiJavaFile) {
             PsiJavaFile javaFile = (PsiJavaFile) containingFile;
             PsiImportList importList = javaFile.getImportList();
             if (importList != null && !hasImport(importList, "java.io.Serializable")) {
-                // 查找Serializable类
                 PsiClass serializableClass = JavaPsiFacade.getInstance(project).findClass("java.io.Serializable", GlobalSearchScope.allScope(project));
                 if (serializableClass != null) {
-                    // 创建具体的import语句
                     PsiImportStatement importStatement = factory.createImportStatement(serializableClass);
                     importList.add(importStatement);
                 }
             }
         }
 
-        // 创建Serializable接口引用（使用简短名称）
         PsiJavaCodeReferenceElement serializableRef = factory.createReferenceFromText("Serializable", psiClass);
 
-        // 获取implements列表
         PsiReferenceList implementsList = psiClass.getImplementsList();
         if (implementsList != null) {
-            // 添加Serializable接口到implements列表
             implementsList.add(serializableRef);
         } else {
-            // 如果没有implements列表，需要创建一个
             PsiReferenceList newImplementsList = factory.createReferenceList(new PsiJavaCodeReferenceElement[]{serializableRef});
             psiClass.addAfter(newImplementsList, psiClass.getNameIdentifier());
         }
     }
 
     /**
-     * 生成serialVersionUID字段代码（不修改PSI）
+     * 统一的生成并添加serialVersionUID的方法
+     * 包含完整的逻辑：确保实现Serializable接口、生成字段、添加导入等
      *
      * @param psiClass 要处理的类
-     * @return 生成的serialVersionUID字段代码
+     * @param project 当前项目
      */
-    public static String generateCompleteSerialVersionUID(PsiClass psiClass) {
-        // 只生成serialVersionUID字段代码，不修改PSI
-        return generateSerialVersionUID(psiClass);
+    public static void generateAndAddSerialVersionUID(PsiClass psiClass, Project project) {
+        if (psiClass == null || project == null) {
+            return;
+        }
+
+        addSerializableInterface(psiClass, project);
+
+        String serialVersionUIDCode = generateSerialVersionUID(psiClass);
+        PsiElementFactory factory = JavaPsiFacade.getElementFactory(project);
+        PsiField field = factory.createFieldFromText(serialVersionUIDCode, psiClass);
+
+        if (hasSerialVersionUID(psiClass)) {
+            PsiField[] fields = psiClass.getFields();
+            for (PsiField existingField : fields) {
+                if ("serialVersionUID".equals(existingField.getName())) {
+                    existingField.replace(field);
+                    break;
+                }
+            }
+        } else {
+            PsiElement anchor = findAnchor(psiClass);
+            if (anchor != null) {
+                psiClass.addBefore(field, anchor);
+            } else {
+                psiClass.add(field);
+            }
+        }
+
+        boolean useSerialAnnotation = shouldUseSerialAnnotation(project);
+        if (useSerialAnnotation) {
+            PsiFile containingFile = psiClass.getContainingFile();
+            if (containingFile instanceof PsiJavaFile) {
+                PsiJavaFile javaFile = (PsiJavaFile) containingFile;
+                PsiImportList importList = javaFile.getImportList();
+                if (importList != null && !hasImport(importList, "java.io.Serial")) {
+                    PsiClass serialClass = JavaPsiFacade.getInstance(project).findClass(
+                            "java.io.Serial",
+                            psiClass.getResolveScope()
+                    );
+                    if (serialClass != null) {
+                        importList.add(factory.createImportStatement(serialClass));
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 查找添加字段的位置，确保serialVersionUID字段位于类的所有字段之前
+     *
+     * @param psiClass 目标类
+     * @return 锚点元素，如果没有找到则返回null
+     */
+    private static PsiElement findAnchor(PsiClass psiClass) {
+        PsiElement firstCodeElement = null;
+        
+        for (PsiElement child : psiClass.getChildren()) {
+            if ((child instanceof PsiField || child instanceof PsiMethod || child instanceof PsiClass) &&
+                child.getParent() == psiClass) {
+                firstCodeElement = child;
+                break;
+            }
+        }
+        
+        return firstCodeElement;
     }
 }
