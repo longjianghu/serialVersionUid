@@ -1,14 +1,17 @@
 package com.sohocn.serialVersionUid.completion;
 
-import java.util.Objects;
-
 import org.jetbrains.annotations.NotNull;
 
 import com.intellij.codeInsight.completion.*;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
+import com.intellij.notification.NotificationGroupManager;
+import com.intellij.notification.NotificationType;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.project.Project;
 import com.intellij.patterns.PsiJavaPatterns;
 import com.intellij.psi.*;
+import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.ProcessingContext;
 import com.sohocn.serialVersionUid.util.SerialVersionUIDGenerator;
 
@@ -64,12 +67,13 @@ public class SerialVersionUIDCompletionContributor extends CompletionContributor
                                                     PsiImportList importList = javaFile.getImportList();
                                                     if (importList != null && !SerialVersionUIDGenerator.hasImport(importList, "java.io.Serial")) {
                                                         PsiElementFactory factory = JavaPsiFacade.getElementFactory(psiClass.getProject());
-                                                        importList.add(factory.createImportStatement(
-                                                                Objects.requireNonNull(JavaPsiFacade.getInstance(psiClass.getProject()).findClass(
-                                                                        "java.io.Serial",
-                                                                        psiClass.getResolveScope()
-                                                                ))
-                                                        ));
+                                                        PsiClass serialClass = JavaPsiFacade.getInstance(psiClass.getProject()).findClass(
+                                                                "java.io.Serial",
+                                                                psiClass.getResolveScope()
+                                                        );
+                                                        if (serialClass != null) {
+                                                            importList.add(factory.createImportStatement(serialClass));
+                                                        }
                                                     }
                                                 }
                                             }
@@ -99,7 +103,7 @@ public class SerialVersionUIDCompletionContributor extends CompletionContributor
                                         .withInsertHandler((context1, item) -> {
                                             context1.getDocument().deleteString(context1.getStartOffset(), context1.getTailOffset());
                                             context1.getDocument().insertString(context1.getStartOffset(), "Serializable");
-                                            
+
                                             PsiDocumentManager.getInstance(psiClass.getProject()).commitDocument(context1.getDocument());
                                             PsiFile file = context1.getFile();
                                             if (file instanceof PsiJavaFile) {
@@ -107,15 +111,16 @@ public class SerialVersionUIDCompletionContributor extends CompletionContributor
                                                 PsiImportList importList = javaFile.getImportList();
                                                 if (importList != null && !SerialVersionUIDGenerator.hasImport(importList, "java.io.Serializable")) {
                                                     PsiElementFactory factory = JavaPsiFacade.getElementFactory(psiClass.getProject());
-                                                    importList.add(factory.createImportStatement(
-                                                            Objects.requireNonNull(JavaPsiFacade.getInstance(psiClass.getProject()).findClass(
-                                                                    "java.io.Serializable",
-                                                                    psiClass.getResolveScope()
-                                                            ))
-                                                    ));
+                                                    PsiClass serializableClass = JavaPsiFacade.getInstance(psiClass.getProject()).findClass(
+                                                            "java.io.Serializable",
+                                                            psiClass.getResolveScope()
+                                                    );
+                                                    if (serializableClass != null) {
+                                                        importList.add(factory.createImportStatement(serializableClass));
+                                                    }
                                                 }
                                             }
-                                            
+
                                             PsiDocumentManager.getInstance(psiClass.getProject()).commitDocument(context1.getDocument());
 
                                             ApplicationManager.getApplication().invokeLater(() -> {
@@ -206,12 +211,13 @@ public class SerialVersionUIDCompletionContributor extends CompletionContributor
                                                 PsiImportList importList = javaFile.getImportList();
                                                 if (importList != null && !SerialVersionUIDGenerator.hasImport(importList, "java.io.Serializable")) {
                                                     PsiElementFactory factory = JavaPsiFacade.getElementFactory(psiClass.getProject());
-                                                    importList.add(factory.createImportStatement(
-                                                            Objects.requireNonNull(JavaPsiFacade.getInstance(psiClass.getProject()).findClass(
-                                                                    "java.io.Serializable",
-                                                                    psiClass.getResolveScope()
-                                                            ))
-                                                    ));
+                                                    PsiClass serializableClass = JavaPsiFacade.getInstance(psiClass.getProject()).findClass(
+                                                            "java.io.Serializable",
+                                                            psiClass.getResolveScope()
+                                                    );
+                                                    if (serializableClass != null) {
+                                                        importList.add(factory.createImportStatement(serializableClass));
+                                                    }
                                                 }
                                             }
                                             
@@ -289,5 +295,62 @@ public class SerialVersionUIDCompletionContributor extends CompletionContributor
             parent = parent.getParent();
         }
         return false;
+    }
+
+    /**
+     * 安全地添加导入语句（如果不存在）
+     *
+     * @param javaFile Java文件
+     * @param qualifiedName 完全限定名
+     * @param project 项目
+     */
+    private void addImportIfNeeded(PsiJavaFile javaFile, String qualifiedName, Project project) {
+        PsiImportList importList = javaFile.getImportList();
+        if (importList == null) {
+            return;
+        }
+
+        if (SerialVersionUIDGenerator.hasImport(importList, qualifiedName)) {
+            return;
+        }
+
+        PsiClass psiClass = JavaPsiFacade.getInstance(project).findClass(
+            qualifiedName,
+            GlobalSearchScope.allScope(project)
+        );
+
+        if (psiClass != null) {
+            PsiElementFactory factory = JavaPsiFacade.getElementFactory(project);
+            importList.add(factory.createImportStatement(psiClass));
+        }
+    }
+
+    /**
+     * 如果需要，添加@Serial注解导入
+     *
+     * @param javaFile Java文件
+     * @param project 项目
+     */
+    private void addSerialAnnotationIfNeeded(PsiJavaFile javaFile, Project project) {
+        if (!SerialVersionUIDGenerator.shouldUseSerialAnnotation(project)) {
+            return;
+        }
+        addImportIfNeeded(javaFile, "java.io.Serial", project);
+    }
+
+    /**
+     * 插入Serializable接口并生成serialVersionUID（异步）
+     *
+     * @param psiClass 目标类
+     * @param project 项目
+     */
+    private void insertSerializableAndGenerateUID(PsiClass psiClass, Project project) {
+        ApplicationManager.getApplication().invokeLater(() -> {
+            if (psiClass.isValid() && !project.isDisposed()) {
+                WriteCommandAction.runWriteCommandAction(project, "Generate serialVersionUID", null, () -> {
+                    SerialVersionUIDGenerator.generateAndAddSerialVersionUID(psiClass, project);
+                });
+            }
+        });
     }
 }

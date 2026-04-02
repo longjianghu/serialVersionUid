@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
@@ -150,7 +151,12 @@ public class SerialVersionUIDGenerator {
             }
             return hash;
         } catch (IOException | NoSuchAlgorithmException e) {
-            // 如果计算失败，返回一个默认值
+            // 如果计算失败，记录错误并返回默认值
+            Logger.getInstance(SerialVersionUIDGenerator.class).error(
+                "Failed to compute serialVersionUID for class: " +
+                (psiClass != null ? psiClass.getQualifiedName() : "null"),
+                e
+            );
             return 1L;
         }
     }
