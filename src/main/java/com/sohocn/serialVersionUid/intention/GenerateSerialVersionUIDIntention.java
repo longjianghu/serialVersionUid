@@ -12,24 +12,21 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.IncorrectOperationException;
 import com.sohocn.serialVersionUid.util.SerialVersionUIDGenerator;
 
+
 /**
- * 为实现了Serializable接口但没有serialVersionUID字段的类提供生成serialVersionUID的意图动作
+ * The type Generate serial version uid intention.
+ *
+ * @author longjianghu
  */
 public class GenerateSerialVersionUIDIntention extends PsiElementBaseIntentionAction implements IntentionAction {
-    @Override
-    public @NotNull String getText() {
-        return "Generate/Update serialVersionUID";
-    }
-
     @Override
     public @NotNull String getFamilyName() {
         return "Serialization";
     }
 
     @Override
-    public boolean isAvailable(@NotNull Project project, Editor editor, @NotNull PsiElement element) {
-        PsiClass psiClass = PsiTreeUtil.getParentOfType(element, PsiClass.class);
-        return psiClass != null;
+    public @NotNull String getText() {
+        return "Generate/Update serialVersionUID";
     }
 
     @Override
@@ -38,8 +35,14 @@ public class GenerateSerialVersionUIDIntention extends PsiElementBaseIntentionAc
         if (psiClass == null) {
             return;
         }
-    
+
         SerialVersionUIDGenerator.generateAndAddSerialVersionUID(psiClass, project);
+    }
+
+    @Override
+    public boolean isAvailable(@NotNull Project project, Editor editor, @NotNull PsiElement element) {
+        PsiClass psiClass = PsiTreeUtil.getParentOfType(element, PsiClass.class);
+        return psiClass != null;
     }
 
     @Override

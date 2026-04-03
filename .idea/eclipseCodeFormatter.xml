@@ -4,7 +4,7 @@
     <option name="projectSpecificProfile">
       <ProjectSpecificProfile>
         <option name="formatter" value="ECLIPSE" />
-        <option name="pathToConfigFileJava" value="$USER_HOME$/Workspace/java/doc/eclipse-codestyle.xml" />
+        <option name="pathToConfigFileJava" value="$PROJECT_DIR$/../../docs/eclipse-codestyle.xml" />
         <option name="selectedJavaProfile" value="P3C-CodeStyle" />
       </ProjectSpecificProfile>
     </option>

@@ -15,9 +15,14 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.sohocn.serialVersionUid.util.SerialVersionUIDGenerator;
 
 /**
- * 在生成菜单（Alt+Insert）中提供生成serialVersionUID的操作
+ * The type Generate serial version uid action.
+ *
+ * @author longjianghu
  */
 public class GenerateSerialVersionUIDAction extends BaseGenerateAction {
+    /**
+     * Instantiates a new Generate serial version uid action.
+     */
     public GenerateSerialVersionUIDAction() {
         super(null);
     }
@@ -26,11 +31,12 @@ public class GenerateSerialVersionUIDAction extends BaseGenerateAction {
     public void actionPerformed(@NotNull AnActionEvent e) {
         Project project = e.getProject();
         PsiClass psiClass = this.getPsiClass(e);
-    
-        String commandName = SerialVersionUIDGenerator.hasSerialVersionUID(psiClass) ? "Update serialVersionUID" : "Generate serialVersionUID";
-        com.intellij.openapi.command.WriteCommandAction.runWriteCommandAction(project, commandName, null, () -> {
-            SerialVersionUIDGenerator.generateAndAddSerialVersionUID(psiClass, project);
-        });
+
+        String commandName = SerialVersionUIDGenerator.hasSerialVersionUID(psiClass) ? "Update SerialVersionUID"
+            : "Generate SerialVersionUID";
+        com.intellij.openapi.command.WriteCommandAction
+            .runWriteCommandAction(project, commandName, null,
+                () -> SerialVersionUIDGenerator.generateAndAddSerialVersionUID(psiClass, project));
     }
 
     @Override

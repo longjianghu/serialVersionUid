@@ -4,22 +4,21 @@ import org.jetbrains.annotations.NotNull;
 
 import com.intellij.codeInsight.completion.*;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
-import com.intellij.notification.NotificationGroupManager;
-import com.intellij.notification.NotificationType;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.command.WriteCommandAction;
-import com.intellij.openapi.project.Project;
 import com.intellij.patterns.PsiJavaPatterns;
 import com.intellij.psi.*;
-import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.ProcessingContext;
 import com.sohocn.serialVersionUid.util.SerialVersionUIDGenerator;
 
 /**
- * 提供serialVersionUID的代码完成功能
+ * The type Serial version uid completion contributor.
+ *
+ * @author longjianghu
  */
 public class SerialVersionUIDCompletionContributor extends CompletionContributor {
-
+    /**
+     * Instantiates a new Serial version uid completion contributor.
+     */
     public SerialVersionUIDCompletionContributor() {
         extend(
                 CompletionType.BASIC,
@@ -32,7 +31,7 @@ public class SerialVersionUIDCompletionContributor extends CompletionContributor
                         PsiElement position = parameters.getPosition();
                         PsiClass psiClass = findContainingClass(position);
 
-                        if (psiClass != null && SerialVersionUIDGenerator.isSerializable(psiClass)) {
+                    if (SerialVersionUIDGenerator.isSerializable(psiClass)) {
                             String text = position.getText();
                             if (text.contains("serialVersionUID")) {
                                 result.addElement(LookupElementBuilder.create("serialVersionUID")
@@ -62,8 +61,7 @@ public class SerialVersionUIDCompletionContributor extends CompletionContributor
                                             if (useSerialAnnotation) {
                                                 PsiDocumentManager.getInstance(psiClass.getProject()).commitDocument(context1.getDocument());
                                                 PsiFile file = context1.getFile();
-                                                if (file instanceof PsiJavaFile) {
-                                                    PsiJavaFile javaFile = (PsiJavaFile) file;
+                                        if (file instanceof PsiJavaFile javaFile) {
                                                     PsiImportList importList = javaFile.getImportList();
                                                     if (importList != null && !SerialVersionUIDGenerator.hasImport(importList, "java.io.Serial")) {
                                                         PsiElementFactory factory = JavaPsiFacade.getElementFactory(psiClass.getProject());
@@ -106,8 +104,7 @@ public class SerialVersionUIDCompletionContributor extends CompletionContributor
 
                                             PsiDocumentManager.getInstance(psiClass.getProject()).commitDocument(context1.getDocument());
                                             PsiFile file = context1.getFile();
-                                            if (file instanceof PsiJavaFile) {
-                                                PsiJavaFile javaFile = (PsiJavaFile) file;
+                                    if (file instanceof PsiJavaFile javaFile) {
                                                 PsiImportList importList = javaFile.getImportList();
                                                 if (importList != null && !SerialVersionUIDGenerator.hasImport(importList, "java.io.Serializable")) {
                                                     PsiElementFactory factory = JavaPsiFacade.getElementFactory(psiClass.getProject());
@@ -129,7 +126,9 @@ public class SerialVersionUIDCompletionContributor extends CompletionContributor
                                                     PsiElementFactory factory = JavaPsiFacade.getElementFactory(psiClass.getProject());
                                                     PsiField field = factory.createFieldFromText(serialVersionUIDCode, psiClass);
 
-                                                    com.intellij.openapi.command.WriteCommandAction.runWriteCommandAction(psiClass.getProject(), "Generate serialVersionUID", null, () -> {
+                                            com.intellij.openapi.command.WriteCommandAction
+                                                .runWriteCommandAction(psiClass.getProject(),
+                                                    "Generate SerialVersionUID", null, () -> {
                                                         PsiElement[] children = psiClass.getChildren();
                                                         if (children.length > 0) {
                                                             psiClass.addBefore(field, children[0]);
@@ -141,6 +140,7 @@ public class SerialVersionUIDCompletionContributor extends CompletionContributor
                                                         if (useSerialAnnotation) {
                                                             PsiFile psiFile = psiClass.getContainingFile();
                                                             if (psiFile instanceof PsiJavaFile) {
+                                                        assert file instanceof PsiJavaFile;
                                                                 PsiJavaFile javaFile = (PsiJavaFile) file;
                                                                 PsiImportList importList = javaFile.getImportList();
                                                                 if (importList != null && !SerialVersionUIDGenerator.hasImport(importList, "java.io.Serial")) {
@@ -206,8 +206,7 @@ public class SerialVersionUIDCompletionContributor extends CompletionContributor
                                             }
                                             
                                             PsiFile file = context1.getFile();
-                                            if (file instanceof PsiJavaFile) {
-                                                PsiJavaFile javaFile = (PsiJavaFile) file;
+                                    if (file instanceof PsiJavaFile javaFile) {
                                                 PsiImportList importList = javaFile.getImportList();
                                                 if (importList != null && !SerialVersionUIDGenerator.hasImport(importList, "java.io.Serializable")) {
                                                     PsiElementFactory factory = JavaPsiFacade.getElementFactory(psiClass.getProject());
@@ -229,7 +228,9 @@ public class SerialVersionUIDCompletionContributor extends CompletionContributor
                                                     PsiElementFactory factory = JavaPsiFacade.getElementFactory(psiClass.getProject());
                                                     PsiField field = factory.createFieldFromText(serialVersionUIDCode, psiClass);
                                                     
-                                                    com.intellij.openapi.command.WriteCommandAction.runWriteCommandAction(psiClass.getProject(), "Generate serialVersionUID", null, () -> {
+                                            com.intellij.openapi.command.WriteCommandAction
+                                                .runWriteCommandAction(psiClass.getProject(),
+                                                    "Generate SerialVersionUID", null, () -> {
                                                         PsiElement[] children = psiClass.getChildren();
                                                         if (children.length > 0) {
                                                             psiClass.addBefore(field, children[0]);
@@ -240,8 +241,7 @@ public class SerialVersionUIDCompletionContributor extends CompletionContributor
                                                         boolean useSerialAnnotation = SerialVersionUIDGenerator.shouldUseSerialAnnotation(psiClass.getProject());
                                                         if (useSerialAnnotation) {
                                                             PsiFile psiFile = psiClass.getContainingFile();
-                                                            if (psiFile instanceof PsiJavaFile) {
-                                                                PsiJavaFile javaFile = (PsiJavaFile) psiFile;
+                                                    if (psiFile instanceof PsiJavaFile javaFile) {
                                                                 PsiImportList importList = javaFile.getImportList();
                                                                 if (importList != null && !SerialVersionUIDGenerator.hasImport(importList, "java.io.Serial")) {
                                                                     PsiClass serialClass = JavaPsiFacade.getInstance(psiClass.getProject()).findClass(
@@ -258,7 +258,7 @@ public class SerialVersionUIDCompletionContributor extends CompletionContributor
                                                         com.intellij.notification.NotificationGroupManager.getInstance()
                                                             .getNotificationGroup("SerialVersionUID Generator")
                                                             .createNotification(
-                                                                    "SerialVersionUID Generator",
+                                                        "SerialVersionUID generator",
                                                                     "已为类 '" + psiClass.getName() + "' 自动生成serialVersionUID字段",
                                                                     com.intellij.notification.NotificationType.INFORMATION)
                                                             .notify(psiClass.getProject());
@@ -273,9 +273,6 @@ public class SerialVersionUIDCompletionContributor extends CompletionContributor
         );
     }
 
-    /**
-     * 查找包含当前元素的类
-     */
     private PsiClass findContainingClass(PsiElement element) {
         while (element != null && !(element instanceof PsiClass)) {
             element = element.getParent();
@@ -283,9 +280,6 @@ public class SerialVersionUIDCompletionContributor extends CompletionContributor
         return (PsiClass) element;
     }
 
-    /**
-     * 判断当前元素是否在实现接口列表中
-     */
     private boolean isInImplementsList(PsiElement element) {
         PsiElement parent = element.getParent();
         while (parent != null) {
@@ -295,62 +289,5 @@ public class SerialVersionUIDCompletionContributor extends CompletionContributor
             parent = parent.getParent();
         }
         return false;
-    }
-
-    /**
-     * 安全地添加导入语句（如果不存在）
-     *
-     * @param javaFile Java文件
-     * @param qualifiedName 完全限定名
-     * @param project 项目
-     */
-    private void addImportIfNeeded(PsiJavaFile javaFile, String qualifiedName, Project project) {
-        PsiImportList importList = javaFile.getImportList();
-        if (importList == null) {
-            return;
-        }
-
-        if (SerialVersionUIDGenerator.hasImport(importList, qualifiedName)) {
-            return;
-        }
-
-        PsiClass psiClass = JavaPsiFacade.getInstance(project).findClass(
-            qualifiedName,
-            GlobalSearchScope.allScope(project)
-        );
-
-        if (psiClass != null) {
-            PsiElementFactory factory = JavaPsiFacade.getElementFactory(project);
-            importList.add(factory.createImportStatement(psiClass));
-        }
-    }
-
-    /**
-     * 如果需要，添加@Serial注解导入
-     *
-     * @param javaFile Java文件
-     * @param project 项目
-     */
-    private void addSerialAnnotationIfNeeded(PsiJavaFile javaFile, Project project) {
-        if (!SerialVersionUIDGenerator.shouldUseSerialAnnotation(project)) {
-            return;
-        }
-        addImportIfNeeded(javaFile, "java.io.Serial", project);
-    }
-
-    /**
-     * 插入Serializable接口并生成serialVersionUID（异步）
-     *
-     * @param psiClass 目标类
-     * @param project 项目
-     */
-    private void insertSerializableAndGenerateUID(PsiClass psiClass, Project project) {
-        ApplicationManager.getApplication().invokeLater(() -> {
-            if (psiClass.isValid() && !project.isDisposed()) {
-                WriteCommandAction.runWriteCommandAction(project, "Generate serialVersionUID", null, () -> {
-                    SerialVersionUIDGenerator.generateAndAddSerialVersionUID(psiClass, project);
-                });
-            }
-        });
     }
 }
